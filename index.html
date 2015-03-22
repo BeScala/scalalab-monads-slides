@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>reveal.js - The HTML Presentation Framework</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/moon.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/monokai_sublime.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-markdown>
+					# ScalaLab
+					### Look Mama, I can Monad without hands!
+				</section>
+
+				<section data-background="#5C5609">
+					<section data-markdown>
+					## Building blocks
+					*  A type constructor
+					*  A unit function, apply method
+					*  A binding operation, flatMap
+					</section>
+					<section data-markdown>
+						## The type contructor 
+						* Option[+A]
+						* Either[+A, +B]
+						* Try[+T]
+					</section>
+					<section data-markdown>
+						##The unit function
+						<pre>
+							<code class="scala">
+							object Option {
+								def apply[A](x: A): Option[A] = 
+								if (x == null) None else Some(x)
+							}
+							val opt = Option("String")
+							</code>
+						</pre>
+					</section>
+					<section data-markdown>
+						##The binding function
+						<pre>
+							<code class="scala">
+							abstract class Option[+A] {
+								def flatMap[B](f: A => Option[B]): Option[B]
+							}
+							</code>
+						</pre>
+					</section>
+					
+				</section>
+				
+				<section data-markdown>
+					##The Maybe Monad
+					We'll start by implementing the Maybe Monad.  
+					Which is just an Option but with another name.
+					<pre>
+						<code class="scala">
+						sealed trait Maybe[+A]
+						case class Just[+A](value: A) extends Maybe[A]
+						case object Empty extends Maybe[Nothing]
+						</code>
+					</pre>
+				</section>
+
+				<section data-background="#360515">
+					<section data-markdown>
+						## Type system basics
+						* Covariance
+						* The bottom type
+					</section>
+					<section data-markdown>
+					##Covariance
+
+					Maybe[+A] - Maybe Monad is covariant on it's type paramter.  
+
+					Given
+					<pre>
+						<code class="scala">
+						trait Animal { def name: String }
+						case class Cat(name:String) extends Animal
+						</code>						
+					</pre>
+					Then
+					<pre>
+						<code class="scala">
+						val maybeCat: Maybe[Cat] = Maybe(Cat("Felix"))
+						maybeCat.isInstanceOf[Maybe[Animal]] // returns true
+						</code>
+					</pre>
+					</section>
+					<section data-markdown>
+						## Nothing
+						The Scala 'Nothing' type is a sub-type of all existing types.  
+						As a consequence:
+						<pre>
+							<code class="scala">
+							val empty = Empty
+							empty.isInstanceOf[Maybe[Animal]] // returns true
+							</code>
+						</pre>
+						but also...
+						<pre>
+							<code class="scala">
+							val empty = Empty
+							trait Foo
+							empty.isInstanceOf[Maybe[Foo]] // returns true
+							</code>
+						</pre>
+					</section>			
+				</section>
+				<section data-markdown>
+				##The Monad laws  
+				We won't talk about it in a slide.  
+				We'll simply code and learn them!.
+				</section>
+				<section data-background="#0C5E75">
+					<section data-markdown>
+					##For comprehension  
+					We have a Monad!  
+					Let's run a for-comprehension
+					</section>
+					<section data-markdown>
+						#Ouch!!!
+					</section>
+				</section>
+				<section data-background="#360515">
+					<section data-markdown>
+						##Maybe is not a Functor yet!  
+						A Functor is any 'Box' that allow us to  
+						 apply a function to it's value.  
+						<pre>
+							<code class="scala">
+							trait Maybe[+A] {
+								def map[B](f: A => B): Maybe[B]
+							}							
+							</code>
+						</pre>
+					</section>
+					<section data-markdown>
+					##The Functor laws  
+					We won't talk about it in a slide.  
+					We'll simply code and learn them!.
+					</section>
+				</section>
+
+				<section data-markdown>
+					## Filtering
+					<pre>
+						<code class="scala">
+						def filter(f: A => Boolean): Maybe[A]
+						</code>
+					</pre>
+				</section> 
+
+				<section data-markdown data-background="#5C5609">
+					##Monads and for-comprehension
+					Don't really need to be a Monad.  
+					It should only have `flatMap`, `map` and `filter`.
+
+					Most of them don't abide to the Monad's laws.
+				</section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

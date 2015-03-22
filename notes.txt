@@ -1,0 +1,7 @@
+Introduce the Monads basic properties
+
+ *  A type constructor
+ *  A unit function, apply method
+ *  A binding operation, flatMap
+
+A word on covariance and the Nothing type
